@@ -1,7 +1,7 @@
 from random import random
 import curses
 import time
-
+# test change
 def update_grid(window, grid):
     for col in range(curses.COLS - 2):
         for row in range(curses.LINES - 3):
