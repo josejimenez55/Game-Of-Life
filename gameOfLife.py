@@ -30,51 +30,51 @@ def main():
     small_box.box()
     small_box.refresh()
 
-    # create random grid
-    grid = [[(int(random() * 10) % 2) for _ in range(cols)] for _ in range(rows)]
-    temp_grid = [[0 for _ in range(cols)] for _ in range(rows)]
+    # create random grid (with padding for wrap-around)
+    grid = [[(int(random() * 10) % 2) for _ in range(cols + 2)] for _ in range(rows + 2)]
+    temp_grid = [[0 for _ in range(cols + 2)] for _ in range(rows + 2)]
     #grid = [[1,0] * (cols / 2) for _ in range(rows)]
     update_grid(small_box, grid)
 
     while(True):
         c = stdscr.getch()
 
+        # copy edges for wrap-around
+        for column in range(1, cols-1):
+            grid[0][column] = grid[-2][column] # top
+            grid[-1][column] = grid[1][column] # bottom
+
+        for r in range(1, rows-1):
+            grid[r][0] = grid[r][-2] # left
+            grid[r][-1] = grid[r][1] # right
+
+        # corners
+        grid[0][0] = grid[-2][-2] # top left
+        grid[-1][0] = grid[1][-2] # bottom left
+        grid[0][-1] = grid[-2][1] # top right
+        grid[-1][-1] = grid[1][1] # bottom right
+
         #grid = [[(int(random() * 10) % 2) for _ in range(cols)] for _ in range(rows)]
-        for column in range(cols):
-            for r in range(rows):
+        for column in range(1, cols-1):
+            for r in range(1, rows-1):
                 neighbor_count = 0
-                r_original = r
-                column_original = column
 
                 neighbor_count = neighbor_count + grid[r-1][column-1] # top left
                 neighbor_count = neighbor_count + grid[r-1][column] # above
                 neighbor_count = neighbor_count + grid[r][column-1] # left
-                # right
-                if column == len(grid[0]) - 1:
-                    column = -1
-                neighbor_count = neighbor_count + grid[r][column+1]
-
+                neighbor_count = neighbor_count + grid[r][column+1] # right
                 neighbor_count = neighbor_count + grid[r-1][column+1] # top right
-                
-                # bottom right
-                if r == len(grid) - 1:
-                    r = -1
-                neighbor_count = neighbor_count + grid[r+1][column+1]
-                column = column_original
-                # below
-                neighbor_count = neighbor_count + grid[r+1][column]
-                # bottom left
-                neighbor_count = neighbor_count + grid[r+1][column-1]
+                neighbor_count = neighbor_count + grid[r+1][column+1] # bottom right
+                neighbor_count = neighbor_count + grid[r+1][column] # below
+                neighbor_count = neighbor_count + grid[r+1][column-1] # bottom left
 
-                r = r_original
                 if neighbor_count < 2:
                     temp_grid[r][column] = 0 # cell dies due to starvation
-               	elif neighbor_count <= 3 and grid[r][column]:
-		    #pass
+               	elif neighbor_count == 2 and grid[r][column]:
                     temp_grid[r][column] = neighbor_count # cell lives on if alive and has between 2 and 3 neighbors
                 elif neighbor_count > 3:
                     temp_grid[r][column] = 0 # cell dies due to overpopulation
-                elif neighbor_count == 3:
+                elif neighbor_count == 3 and not grid[r][column]:
 		    temp_grid[r][column] = neighbor_count # cell is born due to reproduction
 
         temp = grid
