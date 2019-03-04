@@ -6,7 +6,7 @@ def update_grid(window, grid):
     for col in range(curses.COLS - 2):
         for row in range(curses.LINES - 3):
             if grid[row][col]:
-                window.addstr(row+1, col+1, str(grid[row][col]), curses.A_REVERSE)
+                window.addstr(row+1, col+1, ' ', curses.A_REVERSE) #str(grid[row][col])
             else:
                 window.addstr(row+1, col+1, ' ')
     window.refresh()
@@ -59,27 +59,35 @@ def main():
             for r in range(1, rows-1):
                 neighbor_count = 0
 
-                neighbor_count = neighbor_count + grid[r-1][column-1] # top left
-                neighbor_count = neighbor_count + grid[r-1][column] # above
-                neighbor_count = neighbor_count + grid[r][column-1] # left
-                neighbor_count = neighbor_count + grid[r][column+1] # right
-                neighbor_count = neighbor_count + grid[r-1][column+1] # top right
-                neighbor_count = neighbor_count + grid[r+1][column+1] # bottom right
-                neighbor_count = neighbor_count + grid[r+1][column] # below
-                neighbor_count = neighbor_count + grid[r+1][column-1] # bottom left
+                if grid[r-1][column-1]: # top left
+                    neighbor_count = neighbor_count + 1
+                if grid[r-1][column]: # above
+                    neighbor_count = neighbor_count + 1
+                if grid[r][column-1]: # left
+                    neighbor_count = neighbor_count + 1
+                if grid[r][column+1]: # right
+                    neighbor_count = neighbor_count + 1
+                if grid[r-1][column+1]: # top right
+                    neighbor_count = neighbor_count + 1
+                if grid[r+1][column+1]: # bottom right
+                    neighbor_count = neighbor_count + 1
+                if grid[r+1][column]: # below
+                    neighbor_count = neighbor_count + 1
+                if grid[r+1][column-1]: # bottom left
+                    neighbor_count = neighbor_count + 1
 
-                if neighbor_count < 2:
+                if neighbor_count < 2 and grid[r][column]:
                     temp_grid[r][column] = 0 # cell dies due to starvation
-               	elif neighbor_count == 2 and grid[r][column]:
-                    temp_grid[r][column] = neighbor_count # cell lives on if alive and has between 2 and 3 neighbors
+               	elif (neighbor_count == 2 or neighbor_count == 3) and grid[r][column]:
+                    temp_grid[r][column] = 1 #neighbor_count # cell lives on if alive and has between 2 and 3 neighbors
                 elif neighbor_count > 3:
                     temp_grid[r][column] = 0 # cell dies due to overpopulation
-                elif neighbor_count == 3 and not grid[r][column]:
-		    temp_grid[r][column] = neighbor_count # cell is born due to reproduction
+                elif neighbor_count == 3 and grid[r][column] == 0:
+		            temp_grid[r][column] = 1 #neighbor_count # cell is born due to reproduction
 
-        temp = grid
+        #temp = grid
         grid = temp_grid
-        temp_grid = temp
+        temp_grid = [[0 for _ in range(cols + 2)] for _ in range(rows + 2)]
         update_grid(small_box, grid)
         if(c == ord('q')):
             break
