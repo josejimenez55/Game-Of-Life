@@ -8,7 +8,7 @@ def update_grid(window, grid):
             if grid[row][col]:
                 window.addstr(row+1, col+1, ' ', curses.A_REVERSE) #str(grid[row][col])
             else:
-                window.addstr(row+1, col+1, ' ')
+                window.addstr(row+1, col+1, '.')
     window.refresh()
 
 
@@ -23,9 +23,13 @@ def main():
     cols = curses.COLS # number of columns in screen
     rows = curses.LINES # rows
 
+    generation = 0 # number of generations
+
     stdscr.addstr(rows - 1, 2, 'q: exit')
     stdscr.addstr(rows - 1, 15, 'Space: Pause')
+    stdscr.addstr(rows - 1, cols - 17, 'Generation: ')
     stdscr.refresh()
+
     small_box = curses.newwin(rows - 1, cols, 0, 0)
     small_box.box()
     small_box.refresh()
@@ -38,6 +42,9 @@ def main():
 
     while(True):
         c = stdscr.getch()
+
+	generation = generation + 1
+    	stdscr.addstr(rows - 1, cols - 5, str(generation))
 
         # copy edges for wrap-around
         for column in range(1, cols-1):
@@ -88,6 +95,7 @@ def main():
         #temp = grid
         grid = temp_grid
         temp_grid = [[0 for _ in range(cols + 2)] for _ in range(rows + 2)]
+
         update_grid(small_box, grid)
         if(c == ord('q')):
             break
